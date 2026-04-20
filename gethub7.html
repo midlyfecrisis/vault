@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0a">
+<title>VAULT — Hiratani Media</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#0a0a0a;--bg2:#111;--bg3:#191919;--card:#141414;
+  --border:#242424;--border2:#2e2e2e;
+  --text:#f2f2f2;--muted:#666;--hint:#2a2a2a;
+  --red:#cc2222;--red2:#e02828;--red-dim:rgba(204,34,34,0.13);
+  --green:#2e8b4e;--green-dim:rgba(46,139,78,0.13);
+  --blue:#2563a8;--blue-dim:rgba(37,99,168,0.13);
+  --radius:14px;--radius-sm:10px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text)}
+body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
+
+/* ── TOPBAR ── */
+.topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:18px 16px 12px;border-bottom:1px solid var(--border)}
+.logo-main{font-family:'Arial Black',Arial,sans-serif;font-size:22px;letter-spacing:4px;color:#fff;line-height:1}
+.logo-sub{font-size:8px;letter-spacing:3px;color:var(--red);margin-top:2px}
+.topbar-actions{display:flex;gap:8px}
+.t-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--muted);transition:all 0.15s}
+.t-btn:active{transform:scale(0.93)}
+.t-btn.active{border-color:var(--red);color:var(--red)}
+
+/* ── TABS ── */
+.tabs{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border)}
+.tab{flex:1;padding:11px 4px;text-align:center;font-size:8px;letter-spacing:2px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;font-family:'Arial Black',Arial,sans-serif}
+.tab.active{color:var(--red);border-bottom-color:var(--red)}
+
+/* ── PAGES ── */
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.page{display:none;padding:14px 14px 100px}
+.page.active{display:block}
+
+/* ── SEARCH ── */
+.search-wrap{position:relative;margin-bottom:10px}
+.search-input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:50px;padding:11px 14px 11px 40px;font-size:13px;color:var(--text);outline:none;transition:border-color 0.15s}
+.search-input:focus{border-color:var(--red)}
+.search-input::placeholder{color:var(--muted)}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+
+/* ── FILTER CHIPS ── */
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:10px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:7px 16px;border-radius:50px;font-size:9px;letter-spacing:1.5px;border:1px solid var(--border2);cursor:pointer;color:var(--muted);background:var(--bg2);transition:all 0.15s;font-family:'Arial Black',Arial,sans-serif}
+.chip.active{background:var(--red);color:#fff;border-color:var(--red)}
+.chip:active{transform:scale(0.94)}
+
+/* ── LOG ITEMS ── */
+.log-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all 0.15s;position:relative}
+.log-item:active{border-color:var(--red);transform:scale(0.99)}
+.log-item.selected{border-color:var(--red);background:rgba(204,34,34,0.05)}
+.log-top{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.log-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.log-main{flex:1;min-width:0}
+.log-name{font-family:'Arial Black',Arial,sans-serif;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log-date{font-size:10px;color:var(--muted);margin-top:2px}
+.log-check{color:var(--red);font-size:18px;flex-shrink:0}
+.log-tags{display:flex;gap:5px;flex-wrap:wrap}
+.tag{font-size:8px;padding:3px 10px;border-radius:50px;font-family:'Arial Black',Arial,sans-serif;letter-spacing:0.5px}
+.tag-shot{background:var(--red-dim);color:var(--red);border:1px solid rgba(204,34,34,0.25)}
+.tag-a{background:var(--green-dim);color:var(--green);border:1px solid rgba(46,139,78,0.25)}
+.tag-b{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(37,99,168,0.25)}
+.tag-cat{background:var(--bg3);color:var(--muted);border:1px solid var(--border2)}
+.log-notes{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6;padding-top:8px;border-top:1px solid var(--border)}
+
+/* ── EMPTY STATE ── */
+.empty-state{padding:60px 20px;text-align:center;color:var(--muted)}
+.empty-icon{font-size:44px;display:block;margin-bottom:14px;opacity:0.3}
+.empty-text{font-family:'Arial Black',Arial,sans-serif;font-size:10px;letter-spacing:1.5px;line-height:1.8}
+
+/* ── ALBUM CARDS ── */
+.album-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;cursor:pointer;transition:all 0.15s}
+.album-card:active{border-color:var(--red);transform:scale(0.99)}
+.album-icon-wrap{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.album-info{flex:1}
+.album-name{font-family:'Arial Black',Arial,sans-serif;font-size:15px}
+.album-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.album-badges{display:flex;gap:5px;margin-top:7px;flex-wrap:wrap}
+.abadge{font-size:8px;padding:2px 9px;border-radius:50px;font-family:'Arial Black',Arial,sans-serif}
+.abadge-t{background:var(--bg3);color:var(--muted);border:1px solid var(--border2)}
+.abadge-a{background:var(--green-dim);color:var(--green);border:1px solid rgba(46,139,78,0.3)}
+.abadge-b{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(37,99,168,0.3)}
+.album-arr{color:var(--hint);font-size:20px}
+
+/* ── SHOT CARDS ── */
+.shot-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px;display:flex;gap:14px;align-items:center;cursor:pointer;transition:all 0.15s}
+.shot-card:active{border-color:var(--red);transform:scale(0.99)}
+.shot-name{font-family:'Arial Black',Arial,sans-serif;font-size:15px;color:var(--text)}
+.shot-sub{font-size:9px;color:var(--red);letter-spacing:1px;margin-top:2px;font-family:'Arial Black',Arial,sans-serif}
+.shot-desc{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6}
+.shot-count{font-size:9px;color:var(--hint);margin-top:6px;font-family:'Arial Black',Arial,sans-serif}
+.shot-count span{color:var(--red)}
+
+/* ── ADD PAGE ── */
+.add-field-btn{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.15s}
+.add-field-btn:active{border-color:var(--red);transform:scale(0.99)}
+.add-field-label{font-family:'Arial Black',Arial,sans-serif;font-size:9px;letter-spacing:2px;color:var(--muted)}
+.add-field-value{font-size:12px;color:var(--text);text-align:right;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.add-field-value.empty{color:var(--hint)}
+.add-field-arr{color:var(--muted);font-size:16px;margin-left:8px;flex-shrink:0}
+.notes-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:13px;color:var(--text);outline:none;resize:none;min-height:80px;transition:border-color 0.15s;font-family:inherit}
+.notes-input:focus{border-color:var(--red)}
+.notes-input::placeholder{color:var(--muted)}
+.name-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-size:13px;color:var(--text);outline:none;transition:border-color 0.15s;font-family:inherit;margin-bottom:10px}
+.name-input:focus{border-color:var(--red)}
+.name-input::placeholder{color:var(--muted)}
+.save-btn{width:100%;height:52px;border-radius:50px;border:none;background:var(--red);color:#fff;font-family:'Arial Black',Arial,sans-serif;font-size:12px;letter-spacing:2px;cursor:pointer;transition:all 0.15s;margin-bottom:10px}
+.save-btn:active{transform:scale(0.98);background:var(--red2)}
+.clear-btn{width:100%;height:44px;border-radius:50px;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);font-family:'Arial Black',Arial,sans-serif;font-size:10px;letter-spacing:2px;cursor:pointer}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:linear-gradient(to top,var(--bg) 75%,transparent);padding:14px 14px 24px;z-index:100;display:none}
+.bottom-inner{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 -8px 40px rgba(0,0,0,0.7)}
+.sel-label{font-size:10px;color:var(--muted);letter-spacing:1px;font-family:'Arial Black',Arial,sans-serif}
+.sel-num{color:var(--red)}
+.del-btn{height:40px;padding:0 20px;border-radius:50px;border:none;cursor:pointer;font-family:'Arial Black',Arial,sans-serif;font-size:10px;letter-spacing:1px;background:var(--red);color:#fff;margin-left:auto;transition:all 0.15s}
+.del-btn:active{transform:scale(0.95)}
+
+/* ── POPUP SHEET (universal) ── */
+.popup-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;display:none;align-items:flex-end;justify-content:center}
+.popup-backdrop.open{display:flex}
+.popup{background:var(--bg2);border-top:1px solid var(--border2);border-radius:24px 24px 0 0;width:100%;max-width:430px;max-height:92vh;overflow-y:auto;padding:0 0 40px}
+.popup-handle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:14px auto 0}
+.popup-header{padding:16px 18px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:10}
+.popup-title{font-family:'Arial Black',Arial,sans-serif;font-size:13px;letter-spacing:1.5px;color:var(--text)}
+.popup-close{width:32px;height:32px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--muted)}
+.popup-body{padding:16px 18px}
+
+/* ── POPUP OPTION GRID ── */
+.pop-opts{display:flex;flex-direction:column;gap:8px}
+.pop-opt{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.15s}
+.pop-opt:active{border-color:var(--red);transform:scale(0.99)}
+.pop-opt.sel{border-color:var(--red);background:var(--red-dim)}
+.pop-opt-icon{font-size:22px;flex-shrink:0;width:32px;text-align:center}
+.pop-opt-text{flex:1}
+.pop-opt-name{font-family:'Arial Black',Arial,sans-serif;font-size:12px;color:var(--text)}
+.pop-opt-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.pop-opt-check{color:var(--red);font-size:16px;flex-shrink:0;opacity:0}
+.pop-opt.sel .pop-opt-check{opacity:1}
+
+/* ── POPUP ROLL OPTS ── */
+.pop-roll-row{display:flex;gap:8px;margin-bottom:0}
+.pop-roll-btn{flex:1;height:52px;border-radius:50px;border:1px solid var(--border2);background:var(--bg3);font-family:'Arial Black',Arial,sans-serif;font-size:11px;letter-spacing:1.5px;cursor:pointer;color:var(--muted);transition:all 0.15s}
+.pop-roll-btn:active{transform:scale(0.97)}
+.pop-roll-btn.sel-green{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.pop-roll-btn.sel-blue{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+.pop-roll-btn.sel-red{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+
+/* ── POPUP SHOT GRID ── */
+.pop-shot-list{display:flex;flex-direction:column;gap:8px}
+.pop-shot-item{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all 0.15s}
+.pop-shot-item:active{border-color:var(--red);transform:scale(0.99)}
+.pop-shot-item.sel{border-color:var(--red);background:var(--red-dim)}
+.pop-shot-check{color:var(--red);font-size:16px;flex-shrink:0;opacity:0;margin-left:auto}
+.pop-shot-item.sel .pop-shot-check{opacity:1}
+.pop-shot-name{font-family:'Arial Black',Arial,sans-serif;font-size:12px;color:var(--text)}
+.pop-shot-sub{font-size:9px;color:var(--red);margin-top:2px;letter-spacing:0.5px}
+.pop-shot-desc{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.5}
+.pop-all-btn{width:100%;height:44px;border-radius:50px;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);font-family:'Arial Black',Arial,sans-serif;font-size:10px;letter-spacing:1.5px;cursor:pointer;margin-bottom:12px;transition:all 0.15s}
+.pop-all-btn:active{transform:scale(0.97)}
+.pop-all-btn.sel{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+
+/* ── POPUP ACTION BUTTONS ── */
+.pop-confirm{width:100%;height:50px;border-radius:50px;border:none;background:var(--red);color:#fff;font-family:'Arial Black',Arial,sans-serif;font-size:12px;letter-spacing:2px;cursor:pointer;transition:all 0.15s;margin-top:16px}
+.pop-confirm:active{transform:scale(0.98);background:var(--red2)}
+.pop-btn{width:100%;height:46px;border-radius:50px;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);font-family:'Arial Black',Arial,sans-serif;font-size:11px;letter-spacing:1.5px;cursor:pointer;transition:all 0.15s;margin-top:8px}
+.pop-btn:active{transform:scale(0.98)}
+.pop-btn-red{border-color:rgba(204,34,34,0.4);color:var(--red);background:var(--red-dim)}
+.pop-btn-blue{border-color:rgba(37,99,168,0.4);color:#4285f4;background:rgba(66,133,244,0.1)}
+
+/* ── META ROWS ── */
+.meta-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px}
+.meta-key{font-size:9px;letter-spacing:1.5px;color:var(--muted);font-family:'Arial Black',Arial,sans-serif;width:68px;flex-shrink:0;padding-top:3px}
+.meta-val{font-size:12px;color:var(--text);flex:1;line-height:1.5}
+.meta-badge{display:inline-flex;padding:4px 12px;border-radius:50px;font-size:8px;font-family:'Arial Black',Arial,sans-serif;letter-spacing:1px}
+
+/* ── SHOT REFERENCE BOX ── */
+.shot-ref{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:14px;display:flex;gap:14px;align-items:center;margin-bottom:16px}
+.shot-ref-info{flex:1}
+.shot-ref-name{font-family:'Arial Black',Arial,sans-serif;font-size:14px;color:var(--red)}
+.shot-ref-desc{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.5}
+
+/* ── SEC LABEL ── */
+.sec-label{font-family:'Arial Black',Arial,sans-serif;font-size:9px;letter-spacing:2px;color:var(--muted);margin:16px 0 10px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="logo-main">VAULT</div>
+    <div class="logo-sub">HIRATANI MEDIA</div>
+  </div>
+  <div class="topbar-actions">
+    <div class="t-btn" id="selToggleBtn" onclick="toggleSelectMode()">☐</div>
+    <div class="t-btn" onclick="switchTab('add',document.getElementById('addTab'))">＋</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="libTab" onclick="switchTab('library',this)">LIBRARY</div>
+  <div class="tab" id="albTab" onclick="switchTab('albums',this)">ALBUMS</div>
+  <div class="tab" id="shoTab" onclick="switchTab('shots',this)">SHOTS</div>
+  <div class="tab" id="addTab" onclick="switchTab('add',this)">ADD</div>
+</div>
+
+<div class="main">
+
+  <!-- LIBRARY -->
+  <div class="page active" id="page-library">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" type="text" placeholder="search name, notes, category..." oninput="renderLibrary()">
+    </div>
+    <div class="chips" id="filterChips">
+      <div class="chip active" onclick="setFilter('all',this)">ALL</div>
+      <div class="chip" onclick="setFilter('photo',this)">PHOTOS</div>
+      <div class="chip" onclick="setFilter('video',this)">VIDEOS</div>
+      <div class="chip" onclick="setFilter('a-roll',this)">A-ROLL</div>
+      <div class="chip" onclick="setFilter('b-roll',this)">B-ROLL</div>
+      <div class="chip" onclick="setFilter('untagged',this)">UNTAGGED</div>
+    </div>
+    <div id="logList"></div>
+  </div>
+
+  <!-- ALBUMS -->
+  <div class="page" id="page-albums">
+    <div id="albumList"></div>
+  </div>
+
+  <!-- SHOTS -->
+  <div class="page" id="page-shots">
+    <div class="sec-label">TAP A SHOT TO LOG</div>
+    <div id="shotGuide"></div>
+    <div class="sec-label" id="shotResultsLabel" style="margin-top:20px">ALL SHOT-TAGGED ENTRIES</div>
+    <div id="shotLogList"></div>
+  </div>
+
+  <!-- ADD -->
+  <div class="page" id="page-add">
+    <div class="sec-label">FILE INFO</div>
+    <input class="name-input" type="text" id="nameInput" placeholder="File name or description...">
+    <div class="add-field-btn" onclick="openPopup('type')">
+      <div class="add-field-label">TYPE</div>
+      <div class="add-field-value empty" id="disp-type">Tap to select</div>
+      <div class="add-field-arr">›</div>
+    </div>
+    <div class="add-field-btn" onclick="openPopup('category')">
+      <div class="add-field-label">CATEGORY</div>
+      <div class="add-field-value empty" id="disp-category">Tap to select</div>
+      <div class="add-field-arr">›</div>
+    </div>
+    <div class="add-field-btn" onclick="openPopup('roll')">
+      <div class="add-field-label">ROLL TYPE</div>
+      <div class="add-field-value empty" id="disp-roll">Tap to select</div>
+      <div class="add-field-arr">›</div>
+    </div>
+    <div class="add-field-btn" onclick="openPopup('shots')">
+      <div class="add-field-label">SHOT TYPES</div>
+      <div class="add-field-value empty" id="disp-shots">Tap to select</div>
+      <div class="add-field-arr">›</div>
+    </div>
+    <div class="sec-label">NOTES</div>
+    <textarea class="notes-input" id="notesInput" placeholder="Location, context, description..." rows="3"></textarea>
+    <button class="save-btn" onclick="saveEntry()" style="margin-top:14px">SAVE TO VAULT</button>
+    <button class="clear-btn" onclick="resetAdd()">CLEAR</button>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar" id="bottomBar">
+  <div class="bottom-inner">
+    <div class="sel-label"><span class="sel-num" id="selNum">0</span> SELECTED</div>
+    <button class="del-btn" onclick="deleteSelected()">DELETE</button>
+  </div>
+</div>
+
+<!-- UNIVERSAL POPUP -->
+<div class="popup-backdrop" id="popupBackdrop" onclick="closePopupOutside(event)">
+  <div class="popup" id="popupPanel">
+    <div class="popup-handle"></div>
+    <div class="popup-header">
+      <div class="popup-title" id="popupTitle">SELECT</div>
+      <div class="popup-close" onclick="closePopup()">×</div>
+    </div>
+    <div class="popup-body" id="popupBody"></div>
+  </div>
+</div>
+
+<script>
+const ALBUMS=[
+  {id:'detailing', name:'DETAILING',     icon:'🧽',bg:'rgba(204,34,34,0.15)'},
+  {id:'delivery',  name:'DELIVERY',      icon:'📦',bg:'rgba(46,139,78,0.15)'},
+  {id:'travel',    name:'TRAVEL',        icon:'✈️',bg:'rgba(37,99,168,0.15)'},
+  {id:'family',    name:'FAMILY',        icon:'🏠',bg:'rgba(160,60,200,0.15)'},
+  {id:'shopping',  name:'SHOPPING',      icon:'🛒',bg:'rgba(160,120,40,0.15)'},
+  {id:'food',      name:'FOOD & COOKING',icon:'🍳',bg:'rgba(200,100,40,0.15)'},
+  {id:'restaurant',name:'RESTAURANT',    icon:'🍽️',bg:'rgba(60,160,80,0.15)'},
+  {id:'hobbies',   name:'HOBBIES',       icon:'🎮',bg:'rgba(40,120,200,0.15)'},
+  {id:'workouts',  name:'WORKOUTS',      icon:'💪',bg:'rgba(46,139,78,0.15)'},
+  {id:'selfdefense',name:'SELF-DEFENSE', icon:'🥋',bg:'rgba(204,34,34,0.15)'}
+];
+const SHOTS=[
+  {id:'ecu',    name:'DETAIL SHOT',  sub:'ECU — EXTREME CLOSE-UP', desc:'Eye, hand, texture, product detail. Craftsmanship and reaction shots.',frameBottom:22},
+  {id:'closeup',name:'CLOSE-UP',     sub:'CU — CLOSE-UP',          desc:'Head and shoulders fill the frame. Maximum emotional impact.',frameBottom:36},
+  {id:'mcu',    name:'MED CLOSE-UP', sub:'MCU — MEDIUM CLOSE-UP',  desc:'Chest and up. Standard interview, talking-head, vlog framing.',frameBottom:52},
+  {id:'medium', name:'MEDIUM SHOT',  sub:'MS — MEDIUM SHOT',       desc:'Waist and up. Natural conversational distance.',frameBottom:68},
+  {id:'full',   name:'FULL SHOT',    sub:'FS — FULL SHOT',         desc:'Head to toe fully in frame. Full body, outfit, posture.',frameBottom:116},
+  {id:'wide',   name:'WIDE SHOT',    sub:'WS — WIDE SHOT',         desc:'Subject small in large environment. Establishes location and scale.',frameBottom:130}
+];
+
+let entries=[],selectedIds=new Set(),currentFilter='all',selectMode=false,albumFilter=null;
+let addState={type:'',category:'',roll:'',shots:[]};
+let currentPopup=null, shotFormState={};
+
+function load(){try{const r=localStorage.getItem('vault_v4');if(r)entries=JSON.parse(r);}catch(e){entries=[];}}
+function save(){try{localStorage.setItem('vault_v4',JSON.stringify(entries));}catch(e){alert('Storage error.');}}
+load();
+
+// ── TABS ──
+function switchTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  albumFilter=null;
+  if(id==='library')renderLibrary();
+  if(id==='albums')renderAlbums();
+  if(id==='shots')renderShots();
+}
+
+// ── FILTER ──
+function setFilter(f,el){
+  currentFilter=f;albumFilter=null;
+  document.querySelectorAll('#filterChips .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderLibrary();
+}
+
+// ── LIBRARY ──
+function renderLibrary(){
+  const q=document.querySelector('.search-input').value.toLowerCase();
+  let items=[...entries];
+  if(albumFilter)items=items.filter(e=>e.category===albumFilter);
+  else if(currentFilter==='photo')items=items.filter(e=>e.type==='photo');
+  else if(currentFilter==='video')items=items.filter(e=>e.type==='video');
+  else if(currentFilter==='a-roll')items=items.filter(e=>e.roll==='a-roll');
+  else if(currentFilter==='b-roll')items=items.filter(e=>e.roll==='b-roll');
+  else if(currentFilter==='untagged')items=items.filter(e=>!e.roll||e.roll==='untagged');
+  if(q)items=items.filter(e=>
+    (e.name||'').toLowerCase().includes(q)||
+    (e.notes||'').toLowerCase().includes(q)||
+    (e.category||'').toLowerCase().includes(q)
+  );
+  const list=document.getElementById('logList');
+  if(!items.length){
+    list.innerHTML='<div class="empty-state"><span class="empty-icon">📭</span><div class="empty-text">NO ENTRIES YET<br>TAP + TO LOG MEDIA</div></div>';
+    return;
+  }
+  list.innerHTML=items.map(e=>logItemHTML(e)).join('');
+}
+
+function logItemHTML(e){
+  const alb=ALBUMS.find(a=>a.id===e.category);
+  const shots=(e.shots&&e.shots.length?e.shots:(e.shot?[e.shot]:[])).map(id=>SHOTS.find(s=>s.id===id)).filter(Boolean);
+  const dateStr=new Date(e.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  return`<div class="log-item${selectedIds.has(e.id)?' selected':''}" onclick="itemClick('${e.id}')">
+    <div class="log-top">
+      <div class="log-icon" style="background:${alb?alb.bg:'var(--bg3)'}">${alb?alb.icon:(e.type==='video'?'🎬':'📷')}</div>
+      <div class="log-main">
+        <div class="log-name">${e.name||'Untitled'}</div>
+        <div class="log-date">${dateStr} · ${(e.type||'media').toUpperCase()}</div>
+      </div>
+      ${selectMode?`<div class="log-check">${selectedIds.has(e.id)?'✓':''}</div>`:'<div style="color:var(--hint);font-size:16px">›</div>'}
+    </div>
+    <div class="log-tags">
+      ${alb?`<span class="tag tag-cat">${alb.icon} ${alb.name}</span>`:''}
+      ${e.roll&&e.roll!=='untagged'?`<span class="tag ${e.roll==='a-roll'?'tag-a':'tag-b'}">${e.roll.toUpperCase()}</span>`:''}
+      ${shots.map(s=>`<span class="tag tag-shot">${s.name}</span>`).join('')}
+    </div>
+    ${e.notes?`<div class="log-notes">${e.notes}</div>`:''}
+  </div>`;
+}
+
+function itemClick(id){
+  if(selectMode){
+    if(selectedIds.has(id))selectedIds.delete(id);else selectedIds.add(id);
+    document.getElementById('selNum').textContent=selectedIds.size;
+    renderLibrary();
+  }else{
+    openEntryPopup(id);
+  }
+}
+
+function toggleSelectMode(){
+  selectMode=!selectMode;
+  const btn=document.getElementById('selToggleBtn');
+  const bar=document.getElementById('bottomBar');
+  if(selectMode){btn.classList.add('active');btn.textContent='☑';bar.style.display='block';}
+  else{btn.classList.remove('active');btn.textContent='☐';bar.style.display='none';selectedIds.clear();renderLibrary();}
+}
+
+function deleteSelected(){
+  if(!selectedIds.size)return;
+  if(!confirm('Delete '+selectedIds.size+' entr'+(selectedIds.size===1?'y':'ies')+'?'))return;
+  entries=entries.filter(e=>!selectedIds.has(e.id));
+  save();selectedIds.clear();
+  document.getElementById('selNum').textContent=0;
+  renderLibrary();
+}
+
+// ── ENTRY DETAIL POPUP ──
+function openEntryPopup(id){
+  const e=entries.find(i=>i.id===id);
+  if(!e)return;
+  const alb=ALBUMS.find(a=>a.id===e.category);
+  const shots=(e.shots&&e.shots.length?e.shots:(e.shot?[e.shot]:[])).map(id=>SHOTS.find(s=>s.id===id)).filter(Boolean);
+  const dateStr=new Date(e.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const d=new Date(e.date);
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const gpQuery=encodeURIComponent(months[d.getMonth()]+' '+d.getDate()+' '+d.getFullYear());
+  showPopup('ENTRY DETAIL',`
+    <div class="meta-row"><div class="meta-key">NAME</div><div class="meta-val" style="font-family:'Arial Black',Arial,sans-serif">${e.name||'Untitled'}</div></div>
+    <div class="meta-row"><div class="meta-key">TYPE</div><div class="meta-val"><span class="meta-badge" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border2)">${(e.type||'MEDIA').toUpperCase()}</span></div></div>
+    ${alb?`<div class="meta-row"><div class="meta-key">ALBUM</div><div class="meta-val"><span class="meta-badge" style="background:${alb.bg};color:var(--text)">${alb.icon} ${alb.name}</span></div></div>`:''}
+    ${e.roll&&e.roll!=='untagged'?`<div class="meta-row"><div class="meta-key">ROLL</div><div class="meta-val"><span class="meta-badge" style="background:${e.roll==='a-roll'?'var(--green-dim)':'var(--blue-dim)'};color:${e.roll==='a-roll'?'var(--green)':'var(--blue)'}">${e.roll.toUpperCase()}</span></div></div>`:''}
+    ${shots.length?`<div class="meta-row"><div class="meta-key">SHOTS</div><div class="meta-val" style="display:flex;flex-wrap:wrap;gap:5px">${shots.map(s=>`<span class="meta-badge" style="background:var(--red-dim);color:var(--red)">${s.name}</span>`).join('')}</div></div>`:''}
+    ${e.notes?`<div class="meta-row"><div class="meta-key">NOTES</div><div class="meta-val" style="font-size:11px;line-height:1.7;color:var(--muted)">${e.notes}</div></div>`:''}
+    <div class="meta-row"><div class="meta-key">DATE</div><div class="meta-val" style="color:var(--muted);font-size:11px">${dateStr}</div></div>
+    <button class="pop-btn pop-btn-blue" onclick="window.open('https://photos.google.com/search/${gpQuery}','_blank')">🔍 FIND IN GOOGLE PHOTOS</button>
+    <button class="pop-btn pop-btn-red" onclick="deleteEntry('${e.id}')">DELETE ENTRY</button>
+    <button class="pop-btn" onclick="closePopup()">CLOSE</button>
+  `);
+}
+
+function deleteEntry(id){
+  if(!confirm('Delete this entry?'))return;
+  entries=entries.filter(e=>e.id!==id);
+  save();closePopup();renderLibrary();
+}
+
+// ── ALBUMS ──
+function renderAlbums(){
+  document.getElementById('albumList').innerHTML=
+    '<div class="sec-label">YOUR ALBUMS</div>'+
+    ALBUMS.map(a=>{
+      const items=entries.filter(e=>e.category===a.id);
+      const ac=items.filter(e=>e.roll==='a-roll').length;
+      const bc=items.filter(e=>e.roll==='b-roll').length;
+      return`<div class="album-card" onclick="openAlbumPopup('${a.id}')">
+        <div class="album-icon-wrap" style="background:${a.bg}">${a.icon}</div>
+        <div class="album-info">
+          <div class="album-name">${a.name}</div>
+          <div class="album-sub">${items.length} entr${items.length===1?'y':'ies'}</div>
+          <div class="album-badges">
+            <span class="abadge abadge-t">${items.length} TOTAL</span>
+            <span class="abadge abadge-a">A ${ac}</span>
+            <span class="abadge abadge-b">B ${bc}</span>
+          </div>
+        </div>
+        <div class="album-arr">›</div>
+      </div>`;
+    }).join('');
+}
+
+function openAlbumPopup(id){
+  const a=ALBUMS.find(x=>x.id===id);
+  const items=entries.filter(e=>e.category===id);
+  const ac=items.filter(e=>e.roll==='a-roll').length;
+  const bc=items.filter(e=>e.roll==='b-roll').length;
+  const uc=items.filter(e=>!e.roll||e.roll==='untagged').length;
+  showPopup(a.name,`
+    <div style="background:${a.bg};border-radius:var(--radius-sm);padding:20px;text-align:center;margin-bottom:16px;font-size:40px">${a.icon}</div>
+    <div class="meta-row"><div class="meta-key">TOTAL</div><div class="meta-val" style="font-family:'Arial Black',Arial,sans-serif;font-size:16px;color:var(--red)">${items.length} entries</div></div>
+    <div class="meta-row"><div class="meta-key">A-ROLL</div><div class="meta-val"><span class="meta-badge" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(46,139,78,0.3)">${ac} entries</span></div></div>
+    <div class="meta-row"><div class="meta-key">B-ROLL</div><div class="meta-val"><span class="meta-badge" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(37,99,168,0.3)">${bc} entries</span></div></div>
+    <div class="meta-row"><div class="meta-key">UNTAGGED</div><div class="meta-val"><span class="meta-badge" style="background:var(--bg3);color:var(--muted);border:1px solid var(--border2)">${uc} entries</span></div></div>
+    <button class="pop-confirm" onclick="goToAlbum('${id}')">VIEW ALL ENTRIES ›</button>
+    <button class="pop-btn" onclick="closePopup()">CLOSE</button>
+  `);
+}
+
+function goToAlbum(id){
+  albumFilter=id;currentFilter='all';
+  document.querySelector('.search-input').value='';
+  closePopup();
+  switchTab('library',document.getElementById('libTab'));
+  renderLibrary();
+}
+
+// ── SHOTS ──
+function silhouetteSVG(frameBottom,small){
+  const uid=frameBottom,VH=130,w=small?48:64,h=small?78:104;
+  const hCy=15,hR=11,bx=28,bw=24,shY=27,hipY=72;
+  const lLegX=29,rLegX=41,legW=10,footY=112;
+  const lArmX=19,rArmX=53,armW=8,armH=24;
+  return`<svg viewBox="0 0 80 ${VH}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+    <defs><clipPath id="cf${uid}${small?'s':''}"><rect x="0" y="0" width="80" height="${frameBottom}"/></clipPath></defs>
+    <g opacity="0.15" fill="#aaa">
+      <circle cx="40" cy="${hCy}" r="${hR}"/>
+      <rect x="${bx}" y="${shY}" width="${bw}" height="${hipY-shY}" rx="3"/>
+      <rect x="${lArmX}" y="${shY}" width="${armW}" height="${armH}" rx="3"/>
+      <rect x="${rArmX}" y="${shY}" width="${armW}" height="${armH}" rx="3"/>
+      <rect x="${lLegX}" y="${hipY}" width="${legW}" height="${footY-hipY}" rx="3"/>
+      <rect x="${rLegX}" y="${hipY}" width="${legW}" height="${footY-hipY}" rx="3"/>
+    </g>
+    <g clip-path="url(#cf${uid}${small?'s':''})" fill="#f0f0f0">
+      <circle cx="40" cy="${hCy}" r="${hR}"/>
+      <rect x="${bx}" y="${shY}" width="${bw}" height="${hipY-shY}" rx="3"/>
+      <rect x="${lArmX}" y="${shY}" width="${armW}" height="${armH}" rx="3"/>
+      <rect x="${rArmX}" y="${shY}" width="${armW}" height="${armH}" rx="3"/>
+      <rect x="${lLegX}" y="${hipY}" width="${legW}" height="${footY-hipY}" rx="3"/>
+      <rect x="${rLegX}" y="${hipY}" width="${legW}" height="${footY-hipY}" rx="3"/>
+    </g>
+    <rect x="2" y="2" width="76" height="${Math.min(frameBottom,VH)-4}" rx="5" fill="none" stroke="#cc2222" stroke-width="1.5" opacity="0.7"/>
+    ${frameBottom<VH-2?`<line x1="2" y1="${frameBottom-2}" x2="78" y2="${frameBottom-2}" stroke="#cc2222" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.9"/>`:''}
+  </svg>`;
+}
+
+function renderShots(){
+  const count=id=>entries.filter(e=>(e.shots&&e.shots.includes(id))||e.shot===id).length;
+  document.getElementById('shotGuide').innerHTML=SHOTS.map(s=>`
+    <div class="shot-card" onclick="openShotPopup('${s.id}')">
+      ${silhouetteSVG(s.frameBottom,false)}
+      <div style="flex:1">
+        <div class="shot-name">${s.name}</div>
+        <div class="shot-sub">${s.sub}</div>
+        <div class="shot-desc">${s.desc}</div>
+        <div class="shot-count"><span>${count(s.id)}</span> logged</div>
+      </div>
+      <div style="color:var(--hint);font-size:20px">›</div>
+    </div>`).join('');
+  renderShotLog(null);
+}
+
+function renderShotLog(shotId){
+  let items=entries.filter(e=>(e.shots&&e.shots.length)||e.shot);
+  if(shotId)items=items.filter(e=>(e.shots&&e.shots.includes(shotId))||e.shot===shotId);
+  const list=document.getElementById('shotLogList');
+  if(!items.length){
+    list.innerHTML='<div class="empty-state" style="padding:30px 0"><span class="empty-icon" style="font-size:30px">🎬</span><div class="empty-text">NO SHOT-TAGGED ENTRIES YET</div></div>';
+    return;
+  }
+  list.innerHTML=items.map(e=>logItemHTML(e)).join('');
+}
+
+function openShotPopup(shotId){
+  const s=SHOTS.find(x=>x.id===shotId);
+  const sfs=getSFS(shotId);
+  const otherShots=SHOTS.filter(x=>x.id!==shotId);
+  showPopup(s.name,`
+    <div class="shot-ref">
+      ${silhouetteSVG(s.frameBottom,true)}
+      <div class="shot-ref-info">
+        <div class="shot-ref-name">${s.name}</div>
+        <div style="font-size:9px;color:var(--red);letter-spacing:1px;margin-top:2px;font-family:'Arial Black',Arial,sans-serif">${s.sub}</div>
+        <div class="shot-ref-desc">${s.desc}</div>
+      </div>
+    </div>
+
+    <div class="sec-label" style="margin-top:0">FILE NAME</div>
+    <input class="name-input" type="text" id="sf_name" placeholder="e.g. detailing_ecu_001" value="${sfs.name||''}">
+
+    <div class="sec-label">TYPE</div>
+    <div class="pop-roll-row" style="margin-bottom:0">
+      <button class="pop-roll-btn${sfs.type==='photo'?' sel-red':''}" onclick="setSFS('${shotId}','type','photo',this,'pop-roll-btn','sel-red')">📷 PHOTO</button>
+      <button class="pop-roll-btn${sfs.type==='video'?' sel-red':''}" onclick="setSFS('${shotId}','type','video',this,'pop-roll-btn','sel-red')">🎬 VIDEO</button>
+    </div>
+
+    <div class="sec-label">CATEGORY</div>
+    <div class="pop-opts" id="sf_cats">
+      ${ALBUMS.map(a=>`<div class="pop-opt${sfs.category===a.id?' sel':''}" onclick="setSFS('${shotId}','category','${a.id}',this,'pop-opt','sel')">
+        <div class="pop-opt-icon">${a.icon}</div>
+        <div class="pop-opt-text"><div class="pop-opt-name">${a.name}</div></div>
+        <div class="pop-opt-check">✓</div>
+      </div>`).join('')}
+    </div>
+
+    <div class="sec-label">ROLL TYPE</div>
+    <div class="pop-roll-row">
+      <button class="pop-roll-btn${sfs.roll==='a-roll'?' sel-green':''}" onclick="setSFS('${shotId}','roll','a-roll',this,'pop-roll-btn','sel-green')">A-ROLL</button>
+      <button class="pop-roll-btn${sfs.roll==='b-roll'?' sel-blue':''}" onclick="setSFS('${shotId}','roll','b-roll',this,'pop-roll-btn','sel-blue')">B-ROLL</button>
+      <button class="pop-roll-btn${sfs.roll==='untagged'?' sel-red':''}" onclick="setSFS('${shotId}','roll','untagged',this,'pop-roll-btn','sel-red')">UNTAGGED</button>
+    </div>
+
+    <div class="sec-label">ADD OTHER SHOT TYPES?</div>
+    <div id="sf_extra" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:4px">
+      ${otherShots.map(x=>`<div class="chip${(sfs.extraShots||[]).includes(x.id)?' active':''}" onclick="toggleExtraShotPopup('${shotId}','${x.id}',this)">${x.name}</div>`).join('')}
+    </div>
+
+    <div class="sec-label">NOTES</div>
+    <textarea class="notes-input" id="sf_notes" rows="2" placeholder="Location, context...">${sfs.notes||''}</textarea>
+
+    <button class="pop-confirm" onclick="saveShotEntry('${shotId}')">SAVE TO VAULT</button>
+    <button class="pop-btn" onclick="closePopup()">CANCEL</button>
+  `);
+}
+
+function getSFS(sid){if(!shotFormState[sid])shotFormState[sid]={name:'',type:'',category:'',roll:'',extraShots:[],notes:''};return shotFormState[sid];}
+
+function setSFS(shotId,field,val,el,cls,selCls){
+  const sfs=getSFS(shotId);
+  sfs[field]=val;
+  el.closest('.popup-body').querySelectorAll('.'+cls).forEach(b=>b.classList.remove(selCls,'sel-green','sel-blue','sel-red','sel'));
+  el.classList.add(selCls);
+}
+
+function toggleExtraShotPopup(mainId,shotId,el){
+  const sfs=getSFS(mainId);
+  if(!sfs.extraShots)sfs.extraShots=[];
+  if(sfs.extraShots.includes(shotId)){
+    sfs.extraShots=sfs.extraShots.filter(x=>x!==shotId);
+    el.classList.remove('active');
+  }else{
+    sfs.extraShots.push(shotId);
+    el.classList.add('active');
+  }
+}
+
+function saveShotEntry(shotId){
+  const sfs=getSFS(shotId);
+  const name=document.getElementById('sf_name').value.trim();
+  if(!name){alert('Add a file name first.');return;}
+  const allShots=[shotId,...(sfs.extraShots||[])];
+  entries.unshift({
+    id:Date.now()+'-'+Math.random().toString(36).substr(2,6),
+    name,
+    type:sfs.type||'photo',
+    category:sfs.category||'',
+    roll:sfs.roll||'b-roll',
+    shots:allShots,
+    shot:shotId,
+    notes:document.getElementById('sf_notes').value,
+    date:new Date().toISOString()
+  });
+  save();
+  shotFormState[shotId]={name:'',type:'',category:'',roll:'',extraShots:[],notes:''};
+  closePopup();
+  renderShots();renderLibrary();
+  alert('Saved to Vault ✓');
+}
+
+// ── ADD PAGE POPUPS ──
+function openPopup(type){
+  currentPopup=type;
+  if(type==='type'){
+    showPopup('SELECT TYPE',`
+      <div class="pop-opts">
+        <div class="pop-opt${addState.type==='photo'?' sel':''}" onclick="setAdd('type','photo',this)">
+          <div class="pop-opt-icon">📷</div>
+          <div class="pop-opt-text"><div class="pop-opt-name">PHOTO</div><div class="pop-opt-sub">Still image</div></div>
+          <div class="pop-opt-check">✓</div>
+        </div>
+        <div class="pop-opt${addState.type==='video'?' sel':''}" onclick="setAdd('type','video',this)">
+          <div class="pop-opt-icon">🎬</div>
+          <div class="pop-opt-text"><div class="pop-opt-name">VIDEO</div><div class="pop-opt-sub">Video clip</div></div>
+          <div class="pop-opt-check">✓</div>
+        </div>
+      </div>
+      <button class="pop-confirm" onclick="closePopup()">DONE</button>
+    `);
+  } else if(type==='category'){
+    showPopup('SELECT CATEGORY',`
+      <div class="pop-opts">
+        ${ALBUMS.map(a=>`<div class="pop-opt${addState.category===a.id?' sel':''}" onclick="setAdd('category','${a.id}',this)">
+          <div class="pop-opt-icon">${a.icon}</div>
+          <div class="pop-opt-text"><div class="pop-opt-name">${a.name}</div></div>
+          <div class="pop-opt-check">✓</div>
+        </div>`).join('')}
+      </div>
+      <button class="pop-confirm" onclick="closePopup()">DONE</button>
+    `);
+  } else if(type==='roll'){
+    showPopup('SELECT ROLL TYPE',`
+      <div class="pop-opts">
+        <div class="pop-opt${addState.roll==='a-roll'?' sel':''}" onclick="setAdd('roll','a-roll',this)">
+          <div class="pop-opt-icon" style="color:var(--green)">🟢</div>
+          <div class="pop-opt-text"><div class="pop-opt-name">A-ROLL</div><div class="pop-opt-sub">Primary footage — main talking content</div></div>
+          <div class="pop-opt-check">✓</div>
+        </div>
+        <div class="pop-opt${addState.roll==='b-roll'?' sel':''}" onclick="setAdd('roll','b-roll',this)">
+          <div class="pop-opt-icon" style="color:var(--blue)">🔵</div>
+          <div class="pop-opt-text"><div class="pop-opt-name">B-ROLL</div><div class="pop-opt-sub">Supporting footage — cutaways and context</div></div>
+          <div class="pop-opt-check">✓</div>
+        </div>
+        <div class="pop-opt${addState.roll==='untagged'?' sel':''}" onclick="setAdd('roll','untagged',this)">
+          <div class="pop-opt-icon">⬜</div>
+          <div class="pop-opt-text"><div class="pop-opt-name">UNTAGGED</div><div class="pop-opt-sub">Not yet assigned</div></div>
+          <div class="pop-opt-check">✓</div>
+        </div>
+      </div>
+      <button class="pop-confirm" onclick="closePopup()">DONE</button>
+    `);
+  } else if(type==='shots'){
+    showPopup('SELECT SHOT TYPES',`
+      <button class="pop-all-btn${addState.shots.length===SHOTS.length?' sel':''}" onclick="toggleAllShots(this)">⚡ SELECT ALL SHOT TYPES</button>
+      <div class="pop-shot-list">
+        ${SHOTS.map(s=>`<div class="pop-shot-item${addState.shots.includes(s.id)?' sel':''}" onclick="toggleShotAdd('${s.id}',this)">
+          ${silhouetteSVG(s.frameBottom,true)}
+          <div style="flex:1">
+            <div class="pop-shot-name">${s.name}</div>
+            <div class="pop-shot-sub">${s.sub}</div>
+            <div class="pop-shot-desc">${s.desc}</div>
+          </div>
+          <div class="pop-shot-check">✓</div>
+        </div>`).join('')}
+      </div>
+      <button class="pop-confirm" onclick="closePopup()">DONE</button>
+    `);
+  }
+}
+
+function setAdd(field,val,el){
+  addState[field]=val;
+  el.closest('.pop-opts').querySelectorAll('.pop-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  updateAddDisplays();
+}
+
+function toggleShotAdd(id,el){
+  if(addState.shots.includes(id)){
+    addState.shots=addState.shots.filter(x=>x!==id);
+    el.classList.remove('sel');
+  }else{
+    addState.shots.push(id);
+    el.classList.add('sel');
+  }
+  const allBtn=document.querySelector('.pop-all-btn');
+  if(allBtn)allBtn.classList.toggle('sel',addState.shots.length===SHOTS.length);
+  updateAddDisplays();
+}
+
+function toggleAllShots(el){
+  if(addState.shots.length===SHOTS.length){
+    addState.shots=[];
+    document.querySelectorAll('.pop-shot-item').forEach(i=>i.classList.remove('sel'));
+    el.classList.remove('sel');
+  }else{
+    addState.shots=SHOTS.map(s=>s.id);
+    document.querySelectorAll('.pop-shot-item').forEach(i=>i.classList.add('sel'));
+    el.classList.add('sel');
+  }
+  updateAddDisplays();
+}
+
+function updateAddDisplays(){
+  const td=document.getElementById('disp-type');
+  const cd=document.getElementById('disp-category');
+  const rd=document.getElementById('disp-roll');
+  const sd=document.getElementById('disp-shots');
+  if(td){td.textContent=addState.type?addState.type.toUpperCase():'Tap to select';td.className='add-field-value'+(addState.type?'':' empty');}
+  if(cd){const a=ALBUMS.find(x=>x.id===addState.category);cd.textContent=a?a.icon+' '+a.name:'Tap to select';cd.className='add-field-value'+(addState.category?'':' empty');}
+  if(rd){rd.textContent=addState.roll?addState.roll.toUpperCase():'Tap to select';rd.className='add-field-value'+(addState.roll?'':' empty');}
+  if(sd){
+    const names=addState.shots.map(id=>SHOTS.find(s=>s.id===id)?.name).filter(Boolean);
+    sd.textContent=names.length?names.join(', '):'Tap to select';
+    sd.className='add-field-value'+(names.length?'':' empty');
+  }
+}
+
+function saveEntry(){
+  const name=document.getElementById('nameInput').value.trim();
+  if(!name){alert('Add a file name or description first.');return;}
+  if(!addState.category){alert('Choose a category.');return;}
+  entries.unshift({
+    id:Date.now()+'-'+Math.random().toString(36).substr(2,6),
+    name,
+    type:addState.type||'photo',
+    category:addState.category,
+    roll:addState.roll,
+    shots:addState.shots,
+    shot:addState.shots[0]||'',
+    notes:document.getElementById('notesInput').value,
+    date:new Date().toISOString()
+  });
+  save();resetAdd();
+  alert('Saved to Vault ✓');
+  renderLibrary();
+}
+
+function resetAdd(){
+  addState={type:'',category:'',roll:'',shots:[]};
+  document.getElementById('nameInput').value='';
+  document.getElementById('notesInput').value='';
+  updateAddDisplays();
+}
+
+// ── UNIVERSAL POPUP ENGINE ──
+function showPopup(title,body){
+  document.getElementById('popupTitle').textContent=title;
+  document.getElementById('popupBody').innerHTML=body;
+  document.getElementById('popupPanel').scrollTop=0;
+  document.getElementById('popupBackdrop').classList.add('open');
+}
+function closePopup(){
+  document.getElementById('popupBackdrop').classList.remove('open');
+  currentPopup=null;
+}
+function closePopupOutside(e){
+  if(e.target===document.getElementById('popupBackdrop'))closePopup();
+}
+
+renderLibrary();
+renderAlbums();
+</script>
+</body>
+</html>
