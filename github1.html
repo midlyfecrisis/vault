@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0a">
+<title>VAULT — Total Detailz</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-font-smoothing:antialiased}
+:root{
+  --bg:#0a0a0a;--bg2:#111111;--bg3:#191919;--card:#141414;
+  --border:#242424;--border2:#2e2e2e;
+  --text:#f2f2f2;--muted:#777;--hint:#333;
+  --red:#cc2222;--red2:#e02828;--red-dim:rgba(204,34,34,0.13);--red-border:rgba(204,34,34,0.35);
+  --green:#2e8b4e;--green-dim:rgba(46,139,78,0.13);
+  --blue:#2563a8;--blue-dim:rgba(37,99,168,0.13);
+  --radius:14px;--radius-sm:10px;--radius-xs:7px;
+}
+html,body{height:100%;overflow:hidden;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:var(--text)}
+body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
+
+.topbar{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:18px 16px 12px;border-bottom:1px solid var(--border)}
+.logo-wrap{display:flex;flex-direction:column;line-height:1}
+.logo-main{font-family:'Arial Black',Arial,sans-serif;font-size:24px;font-weight:700;letter-spacing:4px;color:#fff}
+.logo-sub{font-size:8.5px;letter-spacing:3.5px;color:var(--red);font-weight:500;margin-top:2px}
+.topbar-actions{display:flex;gap:8px}
+.t-btn{height:38px;padding:0 14px;border-radius:50px;border:1px solid var(--border2);background:var(--bg2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--muted);transition:all 0.15s;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;gap:5px;white-space:nowrap}
+.t-btn:active{transform:scale(0.95);background:var(--bg3)}
+.t-btn.active{border-color:var(--red);color:var(--red)}
+.t-btn-icon{width:38px;padding:0;font-size:16px}
+
+.tabs{flex-shrink:0;display:flex;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 4px}
+.tab{flex:1;padding:11px 4px;text-align:center;font-size:8.5px;letter-spacing:1.8px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;font-family:'Arial Black',Arial,sans-serif}
+.tab.active{color:var(--red);border-bottom-color:var(--red)}
+
+.main{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch}
+.main::-webkit-scrollbar{width:2px}
+.main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.page{display:none;padding:14px 14px 110px}
+.page.active{display:block}
+
+.sec-label{font-family:'Arial Black',Arial,sans-serif;font-size:10px;letter-spacing:2.5px;color:var(--muted);margin:18px 0 10px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.search-wrap{position:relative;margin-bottom:10px}
+.search-input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:50px;padding:11px 14px 11px 40px;font-size:13px;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;outline:none;transition:border-color 0.15s}
+.search-input:focus{border-color:var(--red)}
+.search-input::placeholder{color:var(--muted)}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;margin-bottom:10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:7px 16px;border-radius:50px;font-size:9px;letter-spacing:1.5px;border:1px solid var(--border2);cursor:pointer;color:var(--muted);background:var(--bg2);transition:all 0.15s;font-family:'Arial Black',Arial,sans-serif}
+.chip.active{background:var(--red);color:#fff;border-color:var(--red)}
+.chip:active{transform:scale(0.94)}
+
+.media-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;border-radius:var(--radius);overflow:hidden}
+.thumb{aspect-ratio:1;position:relative;cursor:pointer;overflow:hidden;background:var(--bg3)}
+.thumb-img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:30px}
+.thumb-gradient{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 40%,rgba(0,0,0,0.75));pointer-events:none}
+.thumb-check{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.5);background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;transition:all 0.15s}
+.thumb.selected .thumb-check{background:var(--red);border-color:var(--red);color:#fff}
+.thumb.selected::after{content:'';position:absolute;inset:0;border:2.5px solid var(--red);pointer-events:none}
+.thumb-type{position:absolute;bottom:5px;left:5px;font-size:7.5px;letter-spacing:0.5px;padding:2px 7px;border-radius:50px;font-weight:500;font-family:'Arial Black',Arial,sans-serif}
+.type-photo{background:rgba(46,139,78,0.85);color:#fff}
+.type-video{background:rgba(37,99,168,0.85);color:#fff}
+.thumb-shot{position:absolute;top:5px;left:5px;font-size:7px;letter-spacing:0.5px;padding:2px 7px;border-radius:50px;background:rgba(204,34,34,0.88);color:#fff;font-weight:700;font-family:'Arial Black',Arial,sans-serif}
+.thumb-roll-badge{position:absolute;bottom:5px;right:5px;font-size:7px;padding:2px 7px;border-radius:50px;font-weight:700;font-family:'Arial Black',Arial,sans-serif}
+.roll-a-badge{background:rgba(46,139,78,0.85);color:#fff}
+.roll-b-badge{background:rgba(37,99,168,0.85);color:#fff}
+.empty-grid{padding:50px 20px;text-align:center;color:var(--muted);grid-column:1/-1}
+.empty-icon{font-size:44px;margin-bottom:14px;display:block;opacity:0.35}
+.empty-text{font-size:11px;letter-spacing:1.5px;line-height:1.8;font-family:'Arial Black',Arial,sans-serif}
+
+.album-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:13px;margin-bottom:10px;cursor:pointer;transition:all 0.15s;position:relative;overflow:hidden}
+.album-card:active{border-color:var(--red);background:var(--bg2)}
+.album-icon-wrap{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.album-info{flex:1;min-width:0}
+.album-name{font-family:'Arial Black',Arial,sans-serif;font-size:17px;letter-spacing:1px;color:var(--text);font-weight:600}
+.album-sub{font-size:10px;color:var(--muted);margin-top:3px;letter-spacing:0.5px}
+.album-badges{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.count-badge{font-size:8px;padding:3px 10px;border-radius:50px;letter-spacing:0.5px;font-family:'Arial Black',Arial,sans-serif}
+.badge-total{background:var(--bg3);color:var(--muted);border:1px solid var(--border2)}
+.badge-a{background:var(--green-dim);color:var(--green);border:1px solid rgba(46,139,78,0.3)}
+.badge-b{background:var(--blue-dim);color:var(--blue);border:1px solid rgba(37,99,168,0.3)}
+.album-arrow{color:var(--hint);font-size:22px;flex-shrink:0}
+
+.shot-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all 0.15s;display:flex;gap:16px;align-items:center}
+.shot-card:active,.shot-card.sel-shot-card{border-color:var(--red);background:var(--bg2)}
+.shot-card.sel-shot-card .shot-name{color:var(--red)}
+.shot-silhouette{width:80px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;position:relative}
+.shot-silhouette svg{display:block}
+.shot-info{flex:1}
+.shot-name{font-family:'Arial Black',Arial,sans-serif;font-size:17px;letter-spacing:1px;color:var(--text);font-weight:600;transition:color 0.15s}
+.shot-sub{font-size:9px;color:var(--red);letter-spacing:1px;font-family:'Arial Black',Arial,sans-serif;margin-top:1px}
+.shot-desc{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6;letter-spacing:0.2px}
+.shot-count-lbl{font-size:9px;color:var(--hint);margin-top:8px;letter-spacing:0.5px;font-family:'Arial Black',Arial,sans-serif}
+.shot-count-lbl span{color:var(--red)}
+
+.add-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px}
+.add-card-title{font-family:'Arial Black',Arial,sans-serif;font-size:11px;letter-spacing:2.5px;color:var(--red);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.add-card-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.field-wrap{margin-bottom:14px}
+.field-wrap:last-child{margin-bottom:0}
+.opt-row{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.opt-row::-webkit-scrollbar{display:none}
+.opt-row-wrap{position:relative}
+.opt-row-wrap::after{content:'';position:absolute;top:0;right:0;height:calc(100% - 8px);width:36px;background:linear-gradient(to right,transparent,var(--card));pointer-events:none}
+.opt-btn{flex-shrink:0;padding:8px 16px;border-radius:50px;border:1px solid var(--border2);font-size:10px;letter-spacing:1px;cursor:pointer;color:var(--muted);background:var(--bg3);transition:all 0.15s;font-family:'Arial Black',Arial,sans-serif}
+.opt-btn:active{transform:scale(0.94)}
+.opt-btn.sel-red{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.opt-btn.sel-green{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.opt-btn.sel-blue{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+.notes-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;outline:none;resize:none;min-height:70px;transition:border-color 0.15s}
+.notes-input:focus{border-color:var(--red)}
+.notes-input::placeholder{color:var(--muted)}
+
+.file-pick-zone{border:1.5px dashed var(--border2);border-radius:var(--radius);padding:26px 16px;text-align:center;cursor:pointer;color:var(--muted);transition:all 0.15s;position:relative;overflow:hidden;background:var(--bg3)}
+.file-pick-zone:active{border-color:var(--red);color:var(--red)}
+.file-pick-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.file-pick-icon{font-size:34px;display:block;margin-bottom:10px;opacity:0.45}
+.file-pick-label{font-family:'Arial Black',Arial,sans-serif;font-size:12px;letter-spacing:2px;display:block}
+.file-pick-hint{font-size:9px;margin-top:5px;letter-spacing:0.5px;opacity:0.5}
+.preview-strip{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.preview-item{position:relative;border-radius:var(--radius-xs);overflow:hidden}
+.preview-item img,.preview-item video{width:64px;height:64px;object-fit:cover;display:block}
+.preview-rm{position:absolute;top:3px;right:3px;width:17px;height:17px;border-radius:50%;background:rgba(204,34,34,0.92);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:700}
+
+.confirm-btn{width:100%;height:50px;border-radius:50px;border:none;background:var(--red);color:#fff;font-family:'Arial Black',Arial,sans-serif;font-size:13px;letter-spacing:2px;font-weight:600;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;margin-bottom:10px}
+.confirm-btn:active{transform:scale(0.98);background:var(--red2)}
+.clear-btn{width:100%;height:44px;border-radius:50px;border:1px solid var(--border2);background:var(--bg3);color:var(--muted);font-family:'Arial Black',Arial,sans-serif;font-size:11px;letter-spacing:2px;cursor:pointer;transition:all 0.15s}
+.clear-btn:active{transform:scale(0.98)}
+
+.bottom-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:linear-gradient(to top,var(--bg) 75%,transparent);padding:14px 14px 24px;z-index:100}
+.bottom-inner{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 -8px 40px rgba(0,0,0,0.7)}
+.sel-label{font-size:10px;color:var(--muted);letter-spacing:1px;white-space:nowrap;font-family:'Arial Black',Arial,sans-serif}
+.sel-num{color:var(--red);font-weight:600}
+.bottom-btns{display:flex;gap:8px;margin-left:auto}
+.action-btn{height:40px;padding:0 20px;border-radius:50px;border:none;cursor:pointer;font-family:'Arial Black',Arial,sans-serif;font-size:11px;letter-spacing:1.5px;font-weight:500;transition:all 0.15s}
+.action-btn:active{transform:scale(0.95)}
+.btn-clear{background:var(--bg3);color:var(--muted);border:1px solid var(--border2)}
+.btn-tag{background:var(--red);color:#fff}
+
+.sheet-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:none;align-items:flex-end}
+.sheet-backdrop.open{display:flex}
+.sheet{background:var(--bg2);border-top:1px solid var(--border2);border-radius:24px 24px 0 0;padding:20px 16px 40px;width:100%;max-height:88vh;overflow-y:auto}
+.sheet-handle{width:38px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 20px}
+.sheet-title{font-family:'Arial Black',Arial,sans-serif;font-size:14px;letter-spacing:2px;color:var(--text);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.sheet-close{color:var(--muted);font-size:24px;cursor:pointer;line-height:1}
+.sheet-field{margin-bottom:20px}
+.sheet-label{font-size:9px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;font-family:'Arial Black',Arial,sans-serif}
+.sheet-opts{display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.sheet-opts::-webkit-scrollbar{display:none}
+.sheet-opt{flex-shrink:0;padding:9px 16px;border-radius:50px;border:1px solid var(--border2);font-size:10px;letter-spacing:1px;cursor:pointer;color:var(--muted);background:var(--bg3);transition:all 0.15s;font-family:'Arial Black',Arial,sans-serif}
+.scroll-fade{position:relative}
+.scroll-fade::after{content:'';position:absolute;top:0;right:0;height:100%;width:32px;background:linear-gradient(to right,transparent,var(--card));pointer-events:none;border-radius:0 var(--radius-xs) var(--radius-xs) 0}
+.sheet-opt:active{transform:scale(0.94)}
+.sheet-opt.sel-red{border-color:var(--red);color:var(--red);background:var(--red-dim)}
+.sheet-opt.sel-green{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.sheet-opt.sel-blue{border-color:var(--blue);color:var(--blue);background:var(--blue-dim)}
+.album-sheet-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.album-sheet-item{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px;cursor:pointer;display:flex;align-items:center;gap:9px;transition:all 0.15s}
+.album-sheet-item:active{transform:scale(0.97)}
+.album-sheet-item.sel{border-color:var(--red);background:var(--red-dim)}
+.album-sheet-icon{font-size:20px}
+.album-sheet-name{font-family:'Arial Black',Arial,sans-serif;font-size:11px;letter-spacing:0.5px;color:var(--text);line-height:1.3}
+
+.detail-view{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column;max-width:430px;margin:0 auto}
+.detail-view.open{display:flex}
+.detail-topbar{padding:16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.back-btn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:var(--muted);flex-shrink:0}
+.detail-title{font-family:'Arial Black',Arial,sans-serif;font-size:15px;letter-spacing:1px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail-del{width:38px;height:38px;border-radius:50%;border:1px solid rgba(204,34,34,0.3);background:var(--red-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0}
+.detail-media{flex:1;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#000}
+.detail-media img,.detail-media video{max-width:100%;max-height:100%;object-fit:contain}
+.detail-media .big-placeholder{font-size:80px;opacity:0.25}
+.detail-meta{flex-shrink:0;padding:16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px;max-height:45vh;overflow-y:auto}
+.meta-row{display:flex;align-items:flex-start;gap:10px}
+.meta-key{font-size:9px;letter-spacing:1.5px;color:var(--muted);font-family:'Arial Black',Arial,sans-serif;width:70px;flex-shrink:0;padding-top:2px}
+.meta-val{font-size:12px;color:var(--text);flex:1}
+.meta-badge{display:inline-flex;padding:4px 12px;border-radius:50px;font-size:9px;font-family:'Arial Black',Arial,sans-serif;letter-spacing:1px}
+.shot-cam-btn{margin-top:10px;height:34px;padding:0 14px;border-radius:50px;border:1px solid var(--red-border);background:var(--red-dim);color:var(--red);font-family:'Arial Black',Arial,sans-serif;font-size:9px;letter-spacing:1.5px;cursor:pointer;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px}
+.shot-cam-btn:active{background:var(--red);color:#fff;transform:scale(0.95)}
+
+.cam-overlay{display:none;position:fixed;inset:0;background:#000;z-index:400;flex-direction:column;max-width:430px;margin:0 auto}
+.cam-overlay.open{display:flex}
+.cam-topbar{flex-shrink:0;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:absolute;top:0;left:0;right:0;z-index:10;background:linear-gradient(to bottom,rgba(0,0,0,0.8),transparent)}
+.cam-close{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px;color:#fff}
+.cam-shot-label{font-family:'Arial Black',Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#fff;background:rgba(204,34,34,0.8);padding:6px 14px;border-radius:50px}
+.cam-flip{width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:#fff}
+.cam-viewfinder{flex:1;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#camVideo{width:100%;height:100%;object-fit:cover}
+.cam-guide-overlay{position:absolute;inset:0;pointer-events:none}
+.cam-bottom{flex-shrink:0;padding:24px 16px 40px;display:flex;align-items:center;justify-content:center;gap:28px;position:absolute;bottom:0;left:0;right:0;z-index:10;background:linear-gradient(to top,rgba(0,0,0,0.85),transparent)}
+.cam-gallery-btn{width:52px;height:52px;border-radius:12px;border:2px solid rgba(255,255,255,0.4);overflow:hidden;cursor:pointer;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:20px;position:relative}
+.cam-gallery-btn input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.cam-capture{width:72px;height:72px;border-radius:50%;border:4px solid #fff;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.1s;backdrop-filter:blur(4px)}
+.cam-capture:active{transform:scale(0.92);background:rgba(255,255,255,0.35)}
+.cam-capture-inner{width:52px;height:52px;border-radius:50%;background:#fff}
+.cam-mode-btn{width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,0.3);background:rgba(0,0,0,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;gap:2px}
+.cam-mode-icon{font-size:18px}
+.cam-mode-lbl{font-size:7px;letter-spacing:1px;color:rgba(255,255,255,0.7);font-family:'Arial Black',Arial,sans-serif}
+.cam-mode-btn.recording .cam-capture-inner{background:var(--red)}
+.rec-dot{width:12px;height:12px;border-radius:50%;background:var(--red);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.2}}
+.rec-timer{color:#fff;font-size:13px;letter-spacing:2px;position:absolute;top:60px;left:50%;transform:translateX(-50%);font-family:'Arial Black',Arial,sans-serif;display:none}
+.rec-timer.show{display:block}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo-wrap">
+    <div class="logo-main">VAULT</div>
+    <div class="logo-sub">TOTAL DETAILZ MEDIA</div>
+  </div>
+  <div class="topbar-actions">
+    <div class="t-btn t-btn-icon" id="selToggleBtn" onclick="toggleSelectMode()">☐</div>
+    <div class="t-btn t-btn-icon" onclick="openAddPage()">＋</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('library',this)">LIBRARY</div>
+  <div class="tab" onclick="switchTab('albums',this)">ALBUMS</div>
+  <div class="tab" onclick="switchTab('shots',this)">SHOTS</div>
+  <div class="tab" onclick="openAddPage()" id="addTab">ADD</div>
+</div>
+
+<div class="main">
+
+  <!-- LIBRARY -->
+  <div class="page active" id="page-library">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input class="search-input" type="text" placeholder="search notes, categories..." oninput="renderLibrary()">
+    </div>
+    <div class="chips" id="filterChips">
+      <div class="chip active" onclick="setFilter('all',this)">ALL</div>
+      <div class="chip" onclick="setFilter('photo',this)">PHOTOS</div>
+      <div class="chip" onclick="setFilter('video',this)">VIDEOS</div>
+      <div class="chip" onclick="setFilter('a-roll',this)">A-ROLL</div>
+      <div class="chip" onclick="setFilter('b-roll',this)">B-ROLL</div>
+      <div class="chip" onclick="setFilter('untagged',this)">UNTAGGED</div>
+    </div>
+    <div class="media-grid" id="mediaGrid"></div>
+  </div>
+
+  <!-- ALBUMS -->
+  <div class="page" id="page-albums">
+    <div id="albumList"></div>
+  </div>
+
+  <!-- SHOTS -->
+  <div class="page" id="page-shots">
+    <div class="sec-label">SHOT TYPE GUIDE</div>
+    <div id="shotGuide"></div>
+    <div class="sec-label" id="shotResultsLabel">ALL SHOT-TAGGED MEDIA</div>
+    <div class="media-grid" id="shotGrid"></div>
+  </div>
+
+  <!-- ADD -->
+  <div class="page" id="page-add">
+    <div class="add-card">
+      <div class="add-card-title">MEDIA</div>
+      <div class="file-pick-zone">
+        <input type="file" id="fileInput" accept="image/*,video/*" multiple onchange="handleFiles(this.files)">
+        <span class="file-pick-icon">📂</span>
+        <span class="file-pick-label">TAP TO OPEN GALLERY</span>
+        <span class="file-pick-hint">Select photos &amp; videos from your phone</span>
+      </div>
+      <div class="preview-strip" id="previewStrip"></div>
+    </div>
+
+    <div class="add-card">
+      <div class="add-card-title">CATEGORY</div>
+      <div class="field-wrap">
+        <div class="opt-row-wrap"><div class="opt-row" id="catOpts"></div></div>
+      </div>
+    </div>
+
+    <div class="add-card">
+      <div class="add-card-title">ROLL TYPE</div>
+      <div class="field-wrap">
+        <div class="opt-row-wrap"><div class="opt-row">
+          <div class="opt-btn" onclick="pickOpt(this,'roll','a-roll','sel-green')">A-ROLL</div>
+          <div class="opt-btn" onclick="pickOpt(this,'roll','b-roll','sel-blue')">B-ROLL</div>
+          <div class="opt-btn" onclick="pickOpt(this,'roll','untagged','sel-red')">UNTAGGED</div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="add-card">
+      <div class="add-card-title">SHOT TYPE</div>
+      <div class="field-wrap">
+        <div class="opt-row-wrap"><div class="opt-row" id="shotOpts"></div></div>
+      </div>
+    </div>
+
+    <div class="add-card">
+      <div class="add-card-title">NOTES</div>
+      <div class="field-wrap">
+        <textarea class="notes-input" id="notesInput" placeholder="Location, context, description..." rows="3"></textarea>
+      </div>
+    </div>
+
+    <button class="confirm-btn" onclick="saveMedia()">SAVE TO VAULT</button>
+    <button class="clear-btn" onclick="resetAdd()">CLEAR</button>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar" id="bottomBar" style="display:none">
+  <div class="bottom-inner">
+    <div class="sel-label"><span class="sel-num" id="selNum">0</span> SELECTED</div>
+    <div class="bottom-btns">
+      <button class="action-btn btn-clear" onclick="clearSel()">CLEAR</button>
+      <button class="action-btn btn-tag" onclick="openSheet()">TAG ▸</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAG SHEET -->
+<div class="sheet-backdrop" id="sheetBackdrop" onclick="closeSheetOutside(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">
+      TAG SELECTED MEDIA
+      <span class="sheet-close" onclick="closeSheet()">×</span>
+    </div>
+    <div class="sheet-field">
+      <div class="sheet-label">ALBUM / CATEGORY</div>
+      <div class="album-sheet-grid" id="sheetAlbums"></div>
+    </div>
+    <div class="sheet-field">
+      <div class="sheet-label">ROLL TYPE</div>
+      <div class="sheet-opts">
+        <div class="sheet-opt" onclick="sheetPick(this,'roll','a-roll','sel-green')">A-ROLL</div>
+        <div class="sheet-opt" onclick="sheetPick(this,'roll','b-roll','sel-blue')">B-ROLL</div>
+        <div class="sheet-opt" onclick="sheetPick(this,'roll','untagged','sel-red')">UNTAGGED</div>
+      </div>
+    </div>
+    <div class="sheet-field">
+      <div class="sheet-label">SHOT TYPE</div>
+      <div class="sheet-opts" id="sheetShots"></div>
+    </div>
+    <button class="confirm-btn" onclick="applyTag()">APPLY TAGS</button>
+  </div>
+</div>
+
+<!-- DETAIL VIEW -->
+<div class="detail-view" id="detailView">
+  <div class="detail-topbar">
+    <div class="back-btn" onclick="closeDetail()">‹</div>
+    <div class="detail-title" id="detailTitle">Media</div>
+    <div class="detail-del" onclick="deleteItem()">🗑</div>
+  </div>
+  <div class="detail-media" id="detailMedia"></div>
+  <div class="detail-meta" id="detailMeta"></div>
+</div>
+
+<script>
+const ALBUMS=[
+  {id:'detailing',name:'DETAILING',icon:'🧽',bg:'rgba(204,34,34,0.15)'},
+  {id:'delivery',name:'DELIVERY',icon:'📦',bg:'rgba(46,139,78,0.15)'},
+  {id:'travel',name:'TRAVEL',icon:'✈️',bg:'rgba(37,99,168,0.15)'},
+  {id:'family',name:'FAMILY',icon:'🏠',bg:'rgba(160,60,200,0.15)'},
+  {id:'shopping',name:'SHOPPING',icon:'🛒',bg:'rgba(160,120,40,0.15)'},
+  {id:'food',name:'FOOD & COOKING',icon:'🍳',bg:'rgba(200,100,40,0.15)'},
+  {id:'restaurant',name:'RESTAURANT',icon:'🍽️',bg:'rgba(60,160,80,0.15)'},
+  {id:'hobbies',name:'HOBBIES',icon:'🎮',bg:'rgba(40,120,200,0.15)'},
+  {id:'workouts',name:'WORKOUTS',icon:'💪',bg:'rgba(46,139,78,0.15)'},
+  {id:'selfdefense',name:'SELF-DEFENSE',icon:'🥋',bg:'rgba(204,34,34,0.15)'}
+];
+
+const SHOTS=[
+  {id:'ecu',    name:'DETAIL SHOT',   sub:'ECU — EXTREME CLOSE-UP', desc:'Eye, hand, texture, product detail. No body. Used for craftsmanship and reaction shots.', frameBottom:22},
+  {id:'closeup',name:'CLOSE-UP',      sub:'CU — CLOSE-UP',          desc:'Head and shoulders fill the frame. Maximum emotional impact. Face-forward.', frameBottom:36},
+  {id:'mcu',    name:'MED CLOSE-UP',  sub:'MCU — MEDIUM CLOSE-UP',  desc:'Chest and up. Standard interview, talking-head, and vlog framing.', frameBottom:52},
+  {id:'medium', name:'MEDIUM SHOT',   sub:'MS — MEDIUM SHOT',       desc:'Waist and up. Natural conversational distance. Most common content shot.', frameBottom:68},
+  {id:'full',   name:'FULL SHOT',     sub:'FS — FULL SHOT',         desc:'Head to toe fully in frame. Shows full body, outfit, and posture.', frameBottom:116},
+  {id:'wide',   name:'WIDE SHOT',     sub:'WS — WIDE SHOT',         desc:'Subject small within a large environment. Establishes location and scale.', frameBottom:130}
+];
+
+let mediaItems=[], selectedIds=new Set(), currentFilter='all', selectMode=false;
+let addState={fileData:[],category:'',roll:'',shot:''};
+let sheetState={album:'',roll:'',shot:''};
+let detailId=null;
+let currentShotFilter=null;
+
+function loadData(){try{const r=localStorage.getItem('vault_v2');if(r)mediaItems=JSON.parse(r);}catch(e){mediaItems=[];}}
+function saveData(){
+  try{localStorage.setItem('vault_v2',JSON.stringify(mediaItems));}
+  catch(e){alert('Storage full. Delete some entries to free space.');}
+}
+loadData();
+
+function switchTab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(id==='albums')renderAlbums();
+  if(id==='shots')renderShots();
+  if(id==='library')renderLibrary();
+}
+function openAddPage(){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('addTab').classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-add').classList.add('active');
+}
+
+function setFilter(f,el){
+  currentFilter=f;
+  document.querySelectorAll('#filterChips .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderLibrary();
+}
+
+function renderLibrary(){
+  const q=document.querySelector('.search-input').value.toLowerCase();
+  let items=[...mediaItems];
+  if(currentFilter==='photo')items=items.filter(m=>m.type==='photo');
+  else if(currentFilter==='video')items=items.filter(m=>m.type==='video');
+  else if(currentFilter==='a-roll')items=items.filter(m=>m.roll==='a-roll');
+  else if(currentFilter==='b-roll')items=items.filter(m=>m.roll==='b-roll');
+  else if(currentFilter==='untagged')items=items.filter(m=>!m.roll);
+  if(q)items=items.filter(m=>
+    (m.notes||'').toLowerCase().includes(q)||
+    (m.category||'').toLowerCase().includes(q)||
+    (m.shot||'').toLowerCase().includes(q)||
+    (m.type||'').toLowerCase().includes(q)
+  );
+  const grid=document.getElementById('mediaGrid');
+  if(!items.length){
+    grid.innerHTML='<div class="empty-grid"><span class="empty-icon">📭</span><div class="empty-text">NO MEDIA YET<br>TAP + TO ADD FROM YOUR GALLERY</div></div>';
+    return;
+  }
+  grid.innerHTML=items.map(m=>thumbHTML(m)).join('');
+}
+
+function thumbHTML(m){
+  const shot=m.shot?SHOTS.find(s=>s.id===m.shot):null;
+  const shotLbl=shot?shot.name.split(' ').map(w=>w[0]).join(''):null;
+  const alb=ALBUMS.find(a=>a.id===m.category);
+  const mediaEl=m.dataUrl
+    ?(m.type==='video'
+      ?`<video class="thumb-img" src="${m.dataUrl}" muted playsinline preload="metadata"></video>`
+      :`<img class="thumb-img" src="${m.dataUrl}" loading="lazy">`)
+    :`<div class="thumb-placeholder">${alb?.icon||'📷'}</div>`;
+  return`<div class="thumb${selectedIds.has(m.id)?' selected':''}" onclick="thumbClick(${JSON.stringify(m.id)})">
+    ${mediaEl}
+    <div class="thumb-gradient"></div>
+    ${shotLbl?`<div class="thumb-shot">${shotLbl}</div>`:''}
+    <div class="thumb-type ${m.type==='video'?'type-video':'type-photo'}">${m.type==='video'?'VID':'IMG'}</div>
+    ${m.roll?`<div class="thumb-roll-badge ${m.roll==='a-roll'?'roll-a-badge':'roll-b-badge'}">${m.roll==='a-roll'?'A':'B'}</div>`:''}
+    <div class="thumb-check">${selectedIds.has(m.id)?'✓':''}</div>
+  </div>`;
+}
+
+function thumbClick(id){
+  if(selectMode){
+    if(selectedIds.has(id))selectedIds.delete(id);else selectedIds.add(id);
+    document.getElementById('selNum').textContent=selectedIds.size;
+    renderLibrary();
+  }else{openDetail(id);}
+}
+
+function toggleSelectMode(){
+  selectMode=!selectMode;
+  const btn=document.getElementById('selToggleBtn');
+  const bar=document.getElementById('bottomBar');
+  if(selectMode){btn.classList.add('active');btn.textContent='☑';bar.style.display='block';}
+  else{btn.classList.remove('active');btn.textContent='☐';bar.style.display='none';selectedIds.clear();renderLibrary();}
+}
+function clearSel(){selectedIds.clear();document.getElementById('selNum').textContent=0;renderLibrary();}
+
+function renderAlbums(){
+  document.getElementById('albumList').innerHTML=
+    '<div class="sec-label">YOUR ALBUMS</div>'+
+    ALBUMS.map(a=>{
+      const items=mediaItems.filter(m=>m.category===a.id);
+      const ac=items.filter(m=>m.roll==='a-roll').length;
+      const bc=items.filter(m=>m.roll==='b-roll').length;
+      return`<div class="album-card" onclick="filterByAlbum('${a.id}')">
+        <div class="album-icon-wrap" style="background:${a.bg}">${a.icon}</div>
+        <div class="album-info">
+          <div class="album-name">${a.name}</div>
+          <div class="album-sub">${items.length} item${items.length!==1?'s':''}</div>
+          <div class="album-badges">
+            <span class="count-badge badge-total">${items.length} TOTAL</span>
+            <span class="count-badge badge-a">A-ROLL ${ac}</span>
+            <span class="count-badge badge-b">B-ROLL ${bc}</span>
+          </div>
+        </div>
+        <div class="album-arrow">›</div>
+      </div>`;
+    }).join('');
+}
+
+function filterByAlbum(id){
+  currentFilter='all';
+  document.querySelectorAll('#filterChips .chip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('#filterChips .chip').classList.add('active');
+  document.querySelector('.search-input').value=id;
+  switchTab('library',document.querySelectorAll('.tab')[0]);
+  renderLibrary();
+}
+
+function silhouetteSVG(frameBottom){
+  // viewBox: 0 0 80 130
+  // Body coords: head top=4, head bottom=26, shoulders=28, waist=65, hips=72, knees=92, feet=112
+  // frameBottom = Y coord in SVG where the camera frame cuts off (bottom edge of frame)
+  // Everything ABOVE frameBottom is in-frame (bright), below is out-of-frame (dim)
+  // For WIDE shot frameBottom=130 (entire body + space below feet)
+
+  const uid = frameBottom; // unique id for clipPath
+  const VH = 130;
+
+  // Body parts
+  const hCy=15, hR=11;                        // head circle
+  const bx=28, bw=24;                          // torso x, width
+  const shY=27, waistY=65, hipY=72;           // torso top, waist, hip
+  const lLegX=29, rLegX=41, legW=10;          // legs
+  const kneeY=92, footY=112;
+  const lArmX=19, rArmX=53, armW=8, armH=24; // arms
+
+  // clipPath shows from y=0 down to frameBottom (in-frame portion)
+  return `<svg viewBox="0 0 80 ${VH}" width="68" height="110" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <clipPath id="cf${uid}">
+        <rect x="0" y="0" width="80" height="${frameBottom}"/>
+      </clipPath>
+    </defs>
+
+    <!-- FULL BODY DIM (out of frame) -->
+    <g opacity="0.15" fill="#aaa">
+      <circle cx="40" cy="${hCy}" r="${hR}"/>
+      <rect x="${bx}" y="${shY}" width="${bw}" height="${hipY-shY}" rx="3"/>
+      <rect x="${lArmX}" y="${shY}" width="${armW}" height="${armH}" rx="3"/>
+      <rect x="${rArmX}" y="${shY}" width="${armW}" height="${armH}" rx="3"/>
+      <rect x="${lLegX}" y="${hipY}" width="${legW}" height="${footY-hipY}" rx="3"/>
+      <rect x="${rLegX}" y="${hipY}" width="${legW}" height="${footY-hipY}" rx="3"/>
+    </g>
+
+    <!-- IN-FRAME BODY (bright white, clipped to frame) -->
+    <g clip-path="url(#cf${uid})" fill="#f0f0f0">
+      <circle cx="40" cy="${hCy}" r="${hR}"/>
+      <rect x="${bx}" y="${shY}" width="${bw}" height="${hipY-shY}" rx="3"/>
+      <rect x="${lArmX}" y="${shY}" width="${armW}" height="${armH}" rx="3"/>
+      <rect x="${rArmX}" y="${shY}" width="${armW}" height="${armH}" rx="3"/>
+      <rect x="${lLegX}" y="${hipY}" width="${legW}" height="${footY-hipY}" rx="3"/>
+      <rect x="${rLegX}" y="${hipY}" width="${legW}" height="${footY-hipY}" rx="3"/>
+    </g>
+
+    <!-- FRAME BOX (red border showing what's in camera) -->
+    <rect x="2" y="2" width="76" height="${Math.min(frameBottom,VH)-4}" rx="5"
+      fill="none" stroke="#cc2222" stroke-width="1.5" opacity="0.7"/>
+
+    <!-- BOTTOM CROP LINE (dashed, only if not full frame) -->
+    ${frameBottom < VH-2
+      ? `<line x1="2" y1="${frameBottom-2}" x2="78" y2="${frameBottom-2}" stroke="#cc2222" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.9"/>`
+      : ''}
+  </svg>`;
+}
+
+function renderShots(){
+  document.getElementById('shotGuide').innerHTML=SHOTS.map(s=>`
+    <div class="shot-card">
+      <div class="shot-silhouette" onclick="filterByShot('${s.id}',this.parentElement)">${silhouetteSVG(s.frameBottom)}</div>
+      <div class="shot-info" onclick="filterByShot('${s.id}',this.parentElement)">
+        <div class="shot-name">${s.name}</div>
+        <div class="shot-sub">${s.sub}</div>
+        <div class="shot-desc">${s.desc}</div>
+        <div class="shot-count-lbl"><span>${mediaItems.filter(m=>m.shot===s.id).length}</span> tagged</div>
+        <div class="shot-cam-btn" onclick="event.stopPropagation();document.getElementById('camInput_${s.id}').click()">📷 SHOOT THIS SHOT</div>
+        <input type="file" id="camInput_${s.id}" accept="image/*,video/*" capture="environment" style="display:none" onchange="saveShotCapture('${s.id}',this.files)">
+      </div>
+    </div>`).join('');
+  renderShotGrid(null);
+}
+
+function filterByShot(id,el){
+  document.querySelectorAll('.shot-card').forEach(c=>c.classList.remove('sel-shot-card'));
+  el.classList.toggle('sel-shot-card');
+  currentShotFilter=el.classList.contains('sel-shot-card')?id:null;
+  document.getElementById('shotResultsLabel').textContent=
+    currentShotFilter?SHOTS.find(s=>s.id===id).name+' — RESULTS':'ALL SHOT-TAGGED MEDIA';
+  renderShotGrid(currentShotFilter);
+}
+
+function renderShotGrid(shotId){
+  let items=mediaItems.filter(m=>m.shot);
+  if(shotId)items=items.filter(m=>m.shot===shotId);
+  const grid=document.getElementById('shotGrid');
+  if(!items.length){
+    grid.innerHTML='<div class="empty-grid"><span class="empty-icon" style="font-size:30px">🎬</span><div class="empty-text">NO SHOT-TAGGED MEDIA YET</div></div>';
+    return;
+  }
+  grid.innerHTML=items.map(m=>thumbHTML(m)).join('');
+}
+
+function saveShotCapture(shotId, files){
+  if(!files||!files.length)return;
+  const file=files[0];
+  const reader=new FileReader();
+  reader.onload=e=>{
+    mediaItems.unshift({
+      id:Date.now()+Math.random(),
+      type:file.type.startsWith('video')?'video':'photo',
+      dataUrl:e.target.result,
+      fileName:file.name,
+      category:'',
+      roll:'b-roll',
+      shot:shotId,
+      notes:'',
+      date:new Date().toISOString()
+    });
+    saveData();
+    renderShots();
+    renderLibrary();
+    alert('Saved to Vault ✓');
+  };
+  reader.readAsDataURL(file);
+}
+
+
+function buildAddOpts(){
+  document.getElementById('catOpts').innerHTML=ALBUMS.map(a=>
+    `<div class="opt-btn" onclick="pickOpt(this,'category','${a.id}','sel-red')">${a.icon} ${a.name}</div>`
+  ).join('');
+  document.getElementById('shotOpts').innerHTML=SHOTS.map(s=>
+    `<div class="opt-btn" onclick="pickOpt(this,'shot','${s.id}','sel-red')">${s.name}<br><span style="font-size:8px;opacity:0.6;letter-spacing:0.5px">${s.sub.split('—')[0].trim()}</span></div>`
+  ).join('');
+}
+
+function pickOpt(el,field,val,cls){
+  el.parentElement.querySelectorAll('.opt-btn').forEach(b=>b.classList.remove('sel-red','sel-green','sel-blue'));
+  el.classList.add(cls);
+  addState[field]=val;
+}
+
+function handleFiles(files){
+  addState.fileData=[];
+  const strip=document.getElementById('previewStrip');
+  strip.innerHTML='';
+  Array.from(files).forEach((file,i)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const fd={name:file.name,type:file.type.startsWith('video')?'video':'photo',dataUrl:e.target.result};
+      addState.fileData.push(fd);
+      const wrap=document.createElement('div');
+      wrap.className='preview-item';
+      const el=file.type.startsWith('video')?document.createElement('video'):document.createElement('img');
+      el.src=e.target.result;
+      if(file.type.startsWith('video')){el.muted=true;el.setAttribute('playsinline','');}
+      const rm=document.createElement('div');
+      rm.className='preview-rm';rm.textContent='×';
+      const idx=addState.fileData.length-1;
+      rm.onclick=()=>{wrap.remove();addState.fileData.splice(idx,1);};
+      wrap.appendChild(el);wrap.appendChild(rm);
+      strip.appendChild(wrap);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function saveMedia(){
+  if(!addState.fileData.length){alert('Pick at least one photo or video first.');return;}
+  if(!addState.category){alert('Choose a category.');return;}
+  const notes=document.getElementById('notesInput').value;
+  addState.fileData.forEach(fd=>{
+    mediaItems.unshift({
+      id:Date.now()+Math.random(),
+      type:fd.type,
+      dataUrl:fd.dataUrl,
+      fileName:fd.name,
+      category:addState.category,
+      roll:addState.roll,
+      shot:addState.shot,
+      notes:notes,
+      date:new Date().toISOString()
+    });
+  });
+  saveData();
+  resetAdd();
+  alert('Saved to Vault ✓');
+  renderLibrary();
+}
+
+function resetAdd(){
+  addState={fileData:[],category:'',roll:'',shot:''};
+  document.getElementById('previewStrip').innerHTML='';
+  document.getElementById('notesInput').value='';
+  document.getElementById('fileInput').value='';
+  document.querySelectorAll('#page-add .opt-btn').forEach(b=>b.classList.remove('sel-red','sel-green','sel-blue'));
+}
+
+function openSheet(){
+  if(!selectedIds.size){alert('Select media first by tapping ☐ then tapping items.');return;}
+  sheetState={album:'',roll:'',shot:''};
+  document.getElementById('sheetAlbums').innerHTML=ALBUMS.map(a=>
+    `<div class="album-sheet-item" onclick="sheetAlbum('${a.id}',this)">
+      <span class="album-sheet-icon">${a.icon}</span>
+      <span class="album-sheet-name">${a.name}</span>
+    </div>`
+  ).join('');
+  document.getElementById('sheetShots').innerHTML=SHOTS.map(s=>
+    `<div class="sheet-opt" onclick="sheetPick(this,'shot','${s.id}','sel-red')">${s.name}</div>`
+  ).join('');
+  document.querySelectorAll('.sheet-opt').forEach(o=>o.classList.remove('sel-red','sel-green','sel-blue'));
+  document.getElementById('sheetBackdrop').classList.add('open');
+}
+function sheetAlbum(id,el){
+  sheetState.album=id;
+  document.querySelectorAll('.album-sheet-item').forEach(i=>i.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function sheetPick(el,field,val,cls){
+  el.parentElement.querySelectorAll('.sheet-opt').forEach(b=>b.classList.remove('sel-red','sel-green','sel-blue'));
+  el.classList.add(cls);
+  sheetState[field]=val;
+}
+function closeSheet(){document.getElementById('sheetBackdrop').classList.remove('open');}
+function closeSheetOutside(e){if(e.target===document.getElementById('sheetBackdrop'))closeSheet();}
+
+function applyTag(){
+  if(!sheetState.album&&!sheetState.roll&&!sheetState.shot){alert('Select at least one tag to apply.');return;}
+  selectedIds.forEach(id=>{
+    const m=mediaItems.find(i=>i.id===id);
+    if(m){
+      if(sheetState.album)m.category=sheetState.album;
+      if(sheetState.roll)m.roll=sheetState.roll;
+      if(sheetState.shot)m.shot=sheetState.shot;
+    }
+  });
+  saveData();
+  closeSheet();
+  clearSel();
+  renderLibrary();
+  alert('Tags applied ✓');
+}
+
+function openDetail(id){
+  const m=mediaItems.find(i=>i.id===id);
+  if(!m)return;
+  detailId=id;
+  document.getElementById('detailTitle').textContent=m.fileName||'Media';
+  const med=document.getElementById('detailMedia');
+  if(m.dataUrl){
+    med.innerHTML=m.type==='video'
+      ?`<video src="${m.dataUrl}" controls style="max-width:100%;max-height:100%"></video>`
+      :`<img src="${m.dataUrl}" style="max-width:100%;max-height:100%;object-fit:contain">`;
+  }else{
+    med.innerHTML=`<div class="big-placeholder">${ALBUMS.find(a=>a.id===m.category)?.icon||'📷'}</div>`;
+  }
+  const alb=ALBUMS.find(a=>a.id===m.category);
+  const sht=SHOTS.find(s=>s.id===m.shot);
+  document.getElementById('detailMeta').innerHTML=`
+    ${alb?`<div class="meta-row"><div class="meta-key">ALBUM</div><div class="meta-val"><span class="meta-badge" style="background:${alb.bg};color:var(--text)">${alb.icon} ${alb.name}</span></div></div>`:''}
+    ${m.roll?`<div class="meta-row"><div class="meta-key">ROLL</div><div class="meta-val"><span class="meta-badge" style="background:${m.roll==='a-roll'?'var(--green-dim)':'var(--blue-dim)'};color:${m.roll==='a-roll'?'var(--green)':'var(--blue)'}">${m.roll.toUpperCase()}</span></div></div>`:''}
+    ${sht?`<div class="meta-row"><div class="meta-key">SHOT</div><div class="meta-val"><span class="meta-badge" style="background:var(--red-dim);color:var(--red)">${sht.name}</span></div></div>`:''}
+    ${m.notes?`<div class="meta-row"><div class="meta-key">NOTES</div><div class="meta-val" style="font-size:11px;line-height:1.7;color:var(--muted)">${m.notes}</div></div>`:''}
+    <div class="meta-row"><div class="meta-key">DATE</div><div class="meta-val" style="color:var(--muted);font-size:11px">${new Date(m.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</div></div>
+  `;
+  document.getElementById('detailView').classList.add('open');
+}
+function closeDetail(){document.getElementById('detailView').classList.remove('open');detailId=null;}
+function deleteItem(){
+  if(!detailId)return;
+  if(!confirm('Delete this from Vault?'))return;
+  mediaItems=mediaItems.filter(m=>m.id!==detailId);
+  saveData();closeDetail();renderLibrary();
+}
+
+
+// ── CAMERA ──
+let camStream=null, camShotId=null, camFacing='environment';
+let camMode='photo', mediaRecorder=null, recordedChunks=[], recInterval=null, recSeconds=0;
+
+function openCamera(shotId){
+  camShotId=shotId;
+  const shot=SHOTS.find(s=>s.id===shotId);
+  document.getElementById('camShotLabel').textContent=shot?shot.name:'SHOOT';
+  document.getElementById('camOverlay').classList.add('open');
+  drawGuide(shotId);
+  startStream();
+}
+
+function closeCamera(){
+  stopRecording();
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  document.getElementById('camOverlay').classList.remove('open');
+  document.getElementById('camVideo').srcObject=null;
+}
+
+async function startStream(){
+  if(camStream){camStream.getTracks().forEach(t=>t.stop());}
+  try{
+    camStream=await navigator.mediaDevices.getUserMedia({
+      video:{facingMode:camFacing,width:{ideal:1920},height:{ideal:1080}},
+      audio:true
+    });
+    document.getElementById('camVideo').srcObject=camStream;
+  }catch(e){
+    alert('Camera access denied. Allow camera permission in your browser settings.');
+    closeCamera();
+  }
+}
+
+function flipCamera(){
+  camFacing=camFacing==='environment'?'user':'environment';
+  startStream();
+}
+
+function toggleCamMode(){
+  if(mediaRecorder&&mediaRecorder.state==='recording'){stopRecording();return;}
+  camMode=camMode==='photo'?'video':'photo';
+  document.getElementById('camModeIcon').textContent=camMode==='photo'?'📷':'🎬';
+  document.getElementById('camModeLbl').textContent=camMode==='photo'?'PHOTO':'VIDEO';
+  document.getElementById('captureInner').style.borderRadius=camMode==='video'?'6px':'50%';
+}
+
+function handleCapture(){
+  if(camMode==='photo'){takePhoto();}
+  else{
+    if(mediaRecorder&&mediaRecorder.state==='recording'){stopRecording();}
+    else{startRecording();}
+  }
+}
+
+function takePhoto(){
+  const video=document.getElementById('camVideo');
+  const canvas=document.createElement('canvas');
+  canvas.width=video.videoWidth||1280;
+  canvas.height=video.videoHeight||720;
+  canvas.getContext('2d').drawImage(video,0,0);
+  const dataUrl=canvas.toDataURL('image/jpeg',0.92);
+  saveCaptured(dataUrl,'photo','photo.jpg');
+  // flash effect
+  const fl=document.createElement('div');
+  fl.style.cssText='position:fixed;inset:0;background:#fff;z-index:500;opacity:0.8;pointer-events:none';
+  document.body.appendChild(fl);
+  setTimeout(()=>fl.remove(),150);
+}
+
+function startRecording(){
+  recordedChunks=[];recSeconds=0;
+  const mimeType=MediaRecorder.isTypeSupported('video/mp4')?'video/mp4':'video/webm';
+  mediaRecorder=new MediaRecorder(camStream,{mimeType});
+  mediaRecorder.ondataavailable=e=>{if(e.data.size>0)recordedChunks.push(e.data);};
+  mediaRecorder.onstop=()=>{
+    const blob=new Blob(recordedChunks,{type:mediaRecorder.mimeType});
+    const reader=new FileReader();
+    reader.onload=e=>saveCaptured(e.target.result,'video','video.mp4');
+    reader.readAsDataURL(blob);
+  };
+  mediaRecorder.start();
+  // UI feedback
+  document.getElementById('captureInner').style.background='var(--red)';
+  document.getElementById('captureInner').style.borderRadius='6px';
+  const timer=document.getElementById('recTimer');
+  timer.classList.add('show');
+  recInterval=setInterval(()=>{
+    recSeconds++;
+    const m=Math.floor(recSeconds/60), s=recSeconds%60;
+    timer.textContent=`● ${m}:${String(s).padStart(2,'0')}`;
+  },1000);
+}
+
+function stopRecording(){
+  if(mediaRecorder&&mediaRecorder.state==='recording'){
+    mediaRecorder.stop();
+    clearInterval(recInterval);
+    document.getElementById('recTimer').classList.remove('show');
+    document.getElementById('captureInner').style.background='#fff';
+    document.getElementById('captureInner').style.borderRadius='50%';
+    recSeconds=0;
+  }
+}
+
+function saveCaptured(dataUrl, type, fileName){
+  const id=Date.now()+Math.random();
+  mediaItems.unshift({
+    id, type, dataUrl, fileName,
+    category: camShotId==='ecu'?'detailing':'',
+    roll:'b-roll',
+    shot:camShotId,
+    notes:'',
+    date:new Date().toISOString()
+  });
+  saveData();
+  renderShotGrid(camShotId);
+  renderLibrary();
+  // show saved flash
+  const lbl=document.getElementById('camShotLabel');
+  const orig=lbl.textContent;
+  lbl.textContent='SAVED ✓';
+  lbl.style.background='rgba(46,139,78,0.9)';
+  setTimeout(()=>{lbl.textContent=orig;lbl.style.background='';},1200);
+}
+
+function galleryPickFromCam(files){
+  if(!files.length)return;
+  const file=files[0];
+  const reader=new FileReader();
+  reader.onload=e=>{
+    saveCaptured(e.target.result,file.type.startsWith('video')?'video':'photo',file.name);
+  };
+  reader.readAsDataURL(file);
+}
+
+function drawGuide(shotId){
+  const svg=document.getElementById('camGuide');
+  const guides={
+    ecu:'<rect x="20" y="20" width="60" height="60" fill="none" stroke="rgba(204,34,34,0.6)" stroke-width="0.5" stroke-dasharray="3,2"/><line x1="50" y1="20" x2="50" y2="80" stroke="rgba(255,255,255,0.2)" stroke-width="0.3"/><line x1="20" y1="50" x2="80" y2="50" stroke="rgba(255,255,255,0.2)" stroke-width="0.3"/>',
+    closeup:'<rect x="15" y="5" width="70" height="55" fill="none" stroke="rgba(204,34,34,0.6)" stroke-width="0.5" stroke-dasharray="3,2"/>',
+    mcu:'<rect x="15" y="5" width="70" height="70" fill="none" stroke="rgba(204,34,34,0.6)" stroke-width="0.5" stroke-dasharray="3,2"/>',
+    medium:'<rect x="15" y="5" width="70" height="80" fill="none" stroke="rgba(204,34,34,0.6)" stroke-width="0.5" stroke-dasharray="3,2"/>',
+    full:'<rect x="10" y="2" width="80" height="96" fill="none" stroke="rgba(204,34,34,0.6)" stroke-width="0.5" stroke-dasharray="3,2"/>',
+    wide:'<rect x="2" y="2" width="96" height="96" fill="none" stroke="rgba(204,34,34,0.6)" stroke-width="0.5" stroke-dasharray="3,2"/>'
+  };
+  svg.innerHTML=guides[shotId]||'';
+}
+
+buildAddOpts();
+renderLibrary();
+</script>
+<!-- CAMERA OVERLAY -->
+<div class="cam-overlay" id="camOverlay">
+  <div class="cam-topbar">
+    <div class="cam-close" onclick="closeCamera()">✕</div>
+    <div class="cam-shot-label" id="camShotLabel">FULL SHOT</div>
+    <div class="cam-flip" onclick="flipCamera()">⟳</div>
+  </div>
+  <div class="cam-viewfinder">
+    <video id="camVideo" autoplay playsinline muted></video>
+    <svg class="cam-guide-overlay" id="camGuide" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+    <div class="rec-timer" id="recTimer">● 0:00</div>
+  </div>
+  <div class="cam-bottom">
+    <div class="cam-gallery-btn" title="Pick from gallery">
+      📁
+      <input type="file" accept="image/*,video/*" onchange="galleryPickFromCam(this.files)">
+    </div>
+    <div class="cam-capture" id="camCapture" onclick="handleCapture()">
+      <div class="cam-capture-inner" id="captureInner"></div>
+    </div>
+    <div class="cam-mode-btn" id="camModeBtn" onclick="toggleCamMode()">
+      <div class="cam-mode-icon" id="camModeIcon">📷</div>
+      <div class="cam-mode-lbl" id="camModeLbl">PHOTO</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
